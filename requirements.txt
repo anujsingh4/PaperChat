@@ -8,13 +8,13 @@ python-multipart==0.0.7
 # Environment Configuration
 python-dotenv==1.0.1
 
-# LangChain Core & Integrations (Updated for compatibility)
+# LangChain Core & Integrations (Compatible with Python 3.11)
 langchain==0.2.12
 langchain-core==0.2.38
 langchain-community==0.2.12
 langchain-groq==0.2.1
 langchain-cohere==0.2.0
-langchain-pinecone==0.2.0
+langchain-pinecone==0.0.1
 langchain-text-splitters==0.2.2
 
 # Vector Database
