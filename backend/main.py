@@ -20,7 +20,7 @@ app = FastAPI(title="RAG Assistant API")
 # CORS — allows React dev server to talk to this API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5175","http://localhost:3000"],
+    allow_origins=["http://localhost:5173", "http://localhost:5175","http://localhost:3000", "https://rag-assistant.vercel.app", "https://*.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
