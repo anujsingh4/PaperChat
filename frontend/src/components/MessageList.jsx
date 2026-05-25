@@ -12,7 +12,7 @@ export default function MessageList({ messages }) {
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
-        Upload a document and ask a question
+        Upload a document and start chatting with PaperChat
       </div>
     )
   }

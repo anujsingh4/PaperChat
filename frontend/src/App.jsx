@@ -73,7 +73,7 @@ export default function App() {
 
       {/* Sidebar */}
       <div className="w-72 bg-white border-r border-gray-200 flex flex-col p-4">
-        <h1 className="text-lg font-semibold text-gray-800 mb-4">RAG Assistant</h1>
+        <h1 className="text-lg font-semibold text-gray-800 mb-4">PaperChat</h1>
         <FileUpload onUploadComplete={handleUploadComplete} />
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Documents</span>

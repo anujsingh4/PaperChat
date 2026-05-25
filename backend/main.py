@@ -15,7 +15,7 @@ from pinecone import Pinecone
 from backend.ingest import ingest_file
 from backend.chain import get_chain
 
-app = FastAPI(title="RAG Assistant API")
+app = FastAPI(title="PaperChat API")
 
 # CORS — allows React dev server to talk to this API
 app.add_middleware(
