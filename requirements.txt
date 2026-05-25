@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+python-dotenv
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langchain-cohere
+langchain-pinecone
+langchain-text-splitters
+pinecone-client
+pymupdf
+docx2txt
+pydantic
