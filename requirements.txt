@@ -24,5 +24,5 @@ pinecone-client==3.2.2
 pymupdf==1.24.10
 docx2txt==0.8
 
-# Data Validation
-pydantic==2.8.2
+# Data Validation (with pre-built wheels for Python 3.11)
+pydantic==2.5.2
