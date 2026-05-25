@@ -1,15 +1,28 @@
-fastapi
-uvicorn
-python-multipart
-python-dotenv
-langchain
-langchain-core
-langchain-community
-langchain-groq
-langchain-cohere
-langchain-pinecone
-langchain-text-splitters
-pinecone-client
-pymupdf
-docx2txt
-pydantic
+# Web Framework & Server
+fastapi==0.115.0
+uvicorn==0.30.0
+
+# File Upload Handling
+python-multipart==0.0.7
+
+# Environment Configuration
+python-dotenv==1.0.1
+
+# LangChain Core & Integrations (Updated for compatibility)
+langchain==0.2.12
+langchain-core==0.2.38
+langchain-community==0.2.12
+langchain-groq==0.2.1
+langchain-cohere==0.2.0
+langchain-pinecone==0.2.0
+langchain-text-splitters==0.2.2
+
+# Vector Database
+pinecone-client==3.2.2
+
+# Document Processing
+pymupdf==1.24.10
+docx2txt==0.8
+
+# Data Validation
+pydantic==2.8.2
