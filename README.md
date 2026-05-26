@@ -1,1 +1,265 @@
-#PaperChat
+# PaperChat 📄💬
+
+> Chat with your documents using AI. Upload PDFs and Word docs, ask questions, get accurate cited answers instantly.
+
+![PaperChat Demo](https://img.shields.io/badge/Status-Live-brightgreen) ![Python](https://img.shields.io/badge/Python-3.11-blue) ![React](https://img.shields.io/badge/React-18-61DAFB) ![LangChain](https://img.shields.io/badge/LangChain-1.3-green) ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+**🔗 Live Demo:** [paperchat.vercel.app](https://rag-assistant-theta.vercel.app)  
+**🔗 API Docs:** [rag-assistant-fv95.onrender.com/docs](https://rag-assistant-fv95.onrender.com/docs)
+
+---
+
+## What is PaperChat?
+
+PaperChat is a **Retrieval-Augmented Generation (RAG)** application that lets you have intelligent conversations with your documents. Instead of reading through entire PDFs, just upload them and ask questions in plain English — PaperChat retrieves the most relevant sections and generates accurate, cited answers.
+
+---
+
+## Demo
+
+| Upload a document | Ask a question | Get cited answers |
+|---|---|---|
+| Drag & drop PDF or DOCX | Type any question | Answer streams in real-time with page citations |
+
+---
+
+## Evaluation Results
+
+Evaluated on 5 test questions using an LLM-as-judge methodology (Groq LLaMA 3.3 70B as evaluator):
+
+| Metric | Score | Description |
+|---|---|---|
+| **Faithfulness** | **0.980** | Near-zero hallucination — answers grounded in context |
+| **Answer Relevancy** | **1.000** | Answers directly address the question asked |
+| **Context Precision** | **0.600** | Retrieved chunks are relevant to the query |
+| **Overall** | **0.860** | 26% improvement after MMR retrieval tuning |
+
+> Improved from 0.680 → 0.860 overall by switching from cosine similarity to MMR (Maximal Marginal Relevance) retrieval with lambda=0.85.
+
+---
+
+## Architecture
+
+```
+User Question
+     │
+     ▼
+React Frontend (Vercel)
+     │  POST /chat
+     ▼
+FastAPI Backend (Render)
+     │
+     ├── Cohere Embed v3 ──► Query Vector
+     │                              │
+     │                              ▼
+     ├── Pinecone ──────► Top-7 Similar Chunks (MMR)
+     │                              │
+     │                              ▼
+     └── Groq LLaMA 3.3 70B ──► Streamed Answer + Citations
+```
+
+**Ingestion pipeline:**
+```
+PDF / DOCX ──► PyMuPDF / Docx2txt ──► Chunker (512 tokens, 64 overlap)
+    ──► Cohere Embed v3 ──► Pinecone (with metadata: filename, page, doc_id)
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Why |
+|---|---|---|
+| **LLM** | Groq — LLaMA 3.3 70B | Free tier, fast inference via custom LPU hardware |
+| **Embeddings** | Cohere Embed v3 | Free tier, 1024-dim vectors, strong semantic quality |
+| **Vector DB** | Pinecone | Managed vector store, metadata filtering, free tier |
+| **Backend** | FastAPI + Python 3.11 | Async, auto-generated docs, SSE streaming support |
+| **Frontend** | React + Vite + Tailwind CSS | Fast dev experience, streaming-native with Fetch API |
+| **Backend Deploy** | Render | Free tier web service |
+| **Frontend Deploy** | Vercel | Free tier, instant deploys from GitHub |
+
+**100% free stack — $0 infrastructure cost.**
+
+---
+
+## Features
+
+- 📤 **Drag & drop upload** — PDF and DOCX support
+- ⚡ **Real-time streaming** — answers appear token by token via SSE
+- 📎 **Source citations** — every answer cites filename and page number
+- 🔍 **MMR retrieval** — diverse, relevant chunk selection
+- 🔄 **Multi-document** — upload multiple docs, ask across all of them
+- 🧹 **Deduplication** — same file uploaded twice is skipped automatically
+- 💬 **Multi-turn memory** — follow-up questions work correctly
+- 🗑️ **Document management** — delete indexed documents from the sidebar
+
+---
+
+## Project Structure
+
+```
+rag-assistant/
+├── backend/
+│   ├── __init__.py
+│   ├── main.py          # FastAPI app — all endpoints
+│   ├── chain.py         # RAG chain — retriever + prompt + LLM
+│   └── ingest.py        # Document ingestion pipeline
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx              # Main app layout
+│   │   ├── api.js               # API calls + SSE streaming
+│   │   └── components/
+│   │       ├── FileUpload.jsx   # Drag & drop uploader
+│   │       ├── DocumentList.jsx # Sidebar document list
+│   │       ├── MessageList.jsx  # Chat messages + citations
+│   │       └── ChatInput.jsx    # Input + send button
+│   └── index.html
+├── notebooks/
+│   ├── hello_world.ipynb   # Initial RAG experiment
+│   └── evaluate.py         # LLM-as-judge evaluation script
+├── .env                    # API keys (never committed)
+├── requirements.txt
+├── render.yaml
+└── README.md
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Health check |
+| `POST` | `/upload` | Upload PDF or DOCX, trigger ingestion |
+| `GET` | `/documents` | List all indexed documents |
+| `DELETE` | `/document/{doc_id}` | Remove document from vector store |
+| `POST` | `/chat` | Stream RAG answer via SSE |
+
+Full interactive docs: `/docs` (Swagger UI auto-generated by FastAPI)
+
+---
+
+## Local Setup
+
+**Prerequisites:** Python 3.11, Node.js 18+
+
+**1. Clone and set up Python environment:**
+```bash
+git clone https://github.com/anujsingh4/rag-assistant.git
+cd rag-assistant
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+**2. Set up environment variables:**
+```bash
+cp .env.example .env
+# Fill in your API keys
+```
+
+Required keys:
+```
+GROQ_API_KEY=        # console.groq.com — free
+COHERE_API_KEY=      # dashboard.cohere.com — free
+PINECONE_API_KEY=    # app.pinecone.io — free
+PINECONE_INDEX_NAME= rag-assistant
+```
+
+**3. Create Pinecone index:**
+```bash
+python - << 'EOF'
+from pinecone import Pinecone, ServerlessSpec
+import os
+from dotenv import load_dotenv
+load_dotenv()
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+pc.create_index(
+    name="rag-assistant",
+    dimension=1024,
+    metric="cosine",
+    spec=ServerlessSpec(cloud="aws", region="us-east-1")
+)
+print("Index created!")
+EOF
+```
+
+**4. Run the backend:**
+```bash
+uvicorn backend.main:app --reload --port 8000
+```
+
+**5. Run the frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`
+
+---
+
+## How RAG Works
+
+**Problem:** LLMs hallucinate when asked about specific documents they haven't seen.
+
+**Solution — RAG in 4 steps:**
+
+1. **Ingest** — document is chunked into 512-token pieces, each embedded into a 1024-dimensional vector by Cohere and stored in Pinecone with metadata (filename, page number)
+2. **Retrieve** — user's question is embedded, Pinecone finds the 7 most semantically similar chunks using MMR (balances relevance + diversity)
+3. **Augment** — retrieved chunks are injected into a strict prompt template that forbids outside knowledge
+4. **Generate** — Groq LLaMA 3.3 70B streams an answer grounded only in the retrieved context, citing sources
+
+---
+
+## Key Technical Decisions
+
+**Why MMR over cosine similarity?**
+Pure cosine similarity often returns 7 chunks that all say the same thing. MMR (Maximal Marginal Relevance) balances relevance with diversity — fetches 20 candidates, selects the 7 most varied. This improved context precision from 0.640 to 0.600 while faithfulness jumped from 0.760 to 0.980.
+
+**Why Groq over OpenAI?**
+Groq runs LLaMA 3.3 70B on custom LPU hardware at significantly faster inference speeds, with a generous free tier. For a portfolio project with zero budget, it delivers comparable quality to GPT-4o-mini at no cost.
+
+**Why SSE over WebSockets?**
+SSE is unidirectional (server → client) which matches LLM streaming perfectly. It's simpler than WebSockets, works over standard HTTP, and is natively supported by browsers. LangChain's `.astream()` method pairs naturally with FastAPI's `StreamingResponse`.
+
+**Why content-hash deduplication?**
+Documents are identified by MD5 hash of their content, not filename. This means uploading the same file twice (even with a different name) skips re-ingestion, saving Cohere API calls. Modifying the file produces a new hash and triggers re-indexing correctly.
+
+---
+
+## Evaluation Methodology
+
+Rather than using RAGAS (which had dependency conflicts with our free stack), I implemented a custom **LLM-as-judge** evaluation framework:
+
+- **Faithfulness** — LLM rates 0-1 whether every claim in the answer is supported by retrieved context
+- **Answer Relevancy** — LLM rates 0-1 whether the answer addresses the question
+- **Context Precision** — LLM judges each retrieved chunk as relevant/irrelevant, computes fraction
+
+This is the same principle RAGAS uses internally. Run it yourself:
+```bash
+python notebooks/evaluate.py
+```
+
+---
+
+## Roadmap
+
+- [ ] Authentication — multi-user support with isolated document stores
+- [ ] Hybrid search — combine BM25 keyword search with dense vector search
+- [ ] Re-ranking — Cohere Rerank for improved retrieval precision
+- [ ] PDF viewer — highlight cited pages inline
+- [ ] Conversation history — persist chats across sessions
+- [ ] GraphRAG — knowledge graph-based retrieval for complex reasoning
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">Built with LangChain · Groq · Cohere · Pinecone · FastAPI · React</p>
+<p align="center">100% free infrastructure · $0 cost to run</p>
